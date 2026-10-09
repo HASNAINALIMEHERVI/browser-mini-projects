@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplication Table Generator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #36090f, #b4db75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh; padding: 24px 16px;
+    }
+    .card {
+      background: black;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      width: min(350px, 100%);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #a5e7a9;
+    }
+    input {
+      width: 70%;
+      padding: 10px;
+      border: 2px solid #26a69a;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      outline-offset: 3px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #26a69a;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #96b3b5;
+    }
+    .result {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2498a0;
+    }
+    .line {
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📘 Multiplication Table</h1>
+    <label for="num" style="color:white">Whole number (−1,000,000 to 1,000,000)</label><input type="number" id="num" min="-1000000" max="1000000" step="1" placeholder="Enter a number">
+    <br>
+    <button onclick="generateTable()">Generate</button>
+    <div class="result" id="result" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+    function generateTable() {
+      const value = document.getElementById("num").value;
+      const number = Number(value);
+      const result = document.getElementById("result");
+      result.replaceChildren();
+      if (!value.trim() || !Number.isInteger(number) || Math.abs(number) > 1000000) {
+        result.textContent = "Enter a whole number between −1,000,000 and 1,000,000.";
+        return;
+      }
+      for (let i = 1; i <= 10; i++) {
+        const row = document.createElement("div");
+        row.className = "line";
+        row.textContent = `${number} × ${i} = ${number * i}`;
+        result.appendChild(row);
+      }
+    }
+    document.getElementById("num").addEventListener("keydown", event => { if (event.key === "Enter") generateTable(); });
+  </script>
+</body>
+</html>

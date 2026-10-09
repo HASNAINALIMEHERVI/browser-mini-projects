@@ -1,2 +1,17 @@
-# browser-mini-projects
-Five personal HTML, CSS and JavaScript learning demos: games, numeric tools and browser speech.
+# Browser Mini Projects
+
+Five personal HTML/CSS/JavaScript learning demos by Hasnain Ali Mehervi (Sunny). These are practice projects, not commissioned client work or full business/e-commerce websites.
+
+Open `index.html` for the demo list, then select a demo. No installation is needed. For clipboard and consistent browser behavior, serve the folder with `python -m http.server 8080` and open `http://localhost:8080`.
+
+| Demo | Implemented behavior |
+| --- | --- |
+| Number guessing | Whole-number validation, valid-attempt counting, round completion and reset |
+| Rock-paper-scissors | First-to-five scoring, terminal button state and reset |
+| Temperature converter | Finite Celsius input and Fahrenheit output |
+| Multiplication table | Bounded integer input and ten safe text-rendered rows |
+| Jokes and speech | Local sample jokes, browser speech synthesis, voice selection, clipboard and cancellable segmented playback |
+
+There is no backend, account system, payment service, real storefront or data collection. Speech depends on browser/OS voice availability; clipboard may require a secure context. Browser speech uses the Web Speech API, not Python `pyjokes` or `pyttsx3`. No microphone access is needed.
+
+Input and game logic checks were run in a simulated DOM. Visual browser QA and real speech playback remain to be completed before publication. Personal desktop screenshots, the sample certificate, repetitive private messages and raw text fixtures are excluded.

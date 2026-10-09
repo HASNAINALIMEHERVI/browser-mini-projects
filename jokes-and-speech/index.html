@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Browser Jokes & Speech</title>
+  <style>
+    :root{
+      --bg1: #e0f7fa; /* sky */
+      --bg2: #a5d6a7; /* soft green */
+      --card: #ffffff;
+      --text: #00363a;
+      --accent: #26a69a;
+      --muted: #0b525b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex; align-items:center; justify-content:center; min-height:100vh; color:var(--text);
+      padding:20px;
+    }
+    .card{
+      width:min(720px,98%); background:var(--card); border-radius:14px; box-shadow:0 10px 30px rgba(13, 14, 13, 0.12);
+      padding:20px;
+    }
+    header{display:flex;flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px}
+    h1{margin:0; font-size:20px; color:var(--accent)}
+    p.lead{margin:6px 0 0; color:var(--muted)}
+    .controls{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap}
+    button{
+      background:var(--accent); color:#fff; border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600;
+    }
+    button.secondary{background:transparent; border:2px solid var(--accent); color:var(--accent); font-weight:700}
+    #jokeBox{margin-top:18px; padding:14px; border-radius:10px; background:linear-gradient(180deg,#429a6e,#96ebb3); color:var(--text); font-size:18px}
+    .small{font-size:13px; color:var(--muted); margin-top:8px}
+    .row{display:flex;flex-wrap:wrap; gap:10px; margin-top:12px}
+    label{font-weight:600; margin-right:8px}
+    input[type=range]{width:140px}
+    footer{margin-top:18px; color:var(--muted); font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <div>
+        <h1>Jokes & TTS — Browser Version</h1>
+        <p class="lead">Local sample jokes with browser speech playback.</p>
+      </div>
+      <div style="text-align:right">
+        <div class="small">Voice: <span id="voiceName">default</span></div>
+        <div class="small">Speech playback does not require microphone access.</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <button id="getJokeBtn">Get Random Joke 😂</button>
+      <button id="speakJokeBtn" class="secondary">Speak Joke 🔊</button>
+      <button id="poemBtn">Speak Poem ✨</button>
+      <button id="copyBtn" class="secondary">Copy Joke</button>
+      <button id="stopBtn" class="" style="background:#0c0c0c">Stop</button>
+    </div>
+
+    <div id="jokeBox" role="status" aria-live="polite">Press <strong>Get Random Joke</strong> to fetch a joke.</div>
+
+    <div class="row">
+      <div>
+        <label for="rate">Rate</label>
+        <input id="rate" type="range" min="0.6" max="1.6" step="0.1" value="1">
+      </div>
+      <div>
+        <label for="pitch">Pitch</label>
+        <input id="pitch" type="range" min="0.6" max="2" step="0.1" value="1">
+      </div>
+      <div>
+        <label for="volume">Volume</label>
+        <input id="volume" type="range" min="0" max="1" step="0.1" value="1">
+      </div>
+    </div>
+
+    <div class="small">Note: Browser uses <em>speechSynthesis</em>. Behaviour/voices differ per browser & OS. For best results use Chrome or Edge on desktop.</div>
+
+    <footer>
+      Personal browser demo. No Python backend is included. Speech voices depend on your browser and operating system.
+    </footer>
+  </div>
+
+  <script>
+    // --- jokes list (local replacement of pyjokes) ---
+    const jokes = [
+      "I told my computer I needed a break, and it said: 'No problem — I'll go to sleep.'",
+      "Why do programmers prefer dark mode? Because light attracts bugs!",
+      "There are 10 types of people in the world: those who understand binary and those who don't.",
+      "Why did the programmer quit his job? Because he didn't get arrays.",
+      "What's a programmer's favourite hangout place? Foo Bar.",
+      "Why do Java developers wear glasses? Because they don't C#.",
+      "I would tell you a UDP joke, but you might not get it.",
+      "Debugging: Removing the needles from the haystack.",
+      "Real programmers count from 0.",
+      "I told a joke about recursion... and then I told it again."
+    ];
+
+    const jokeBox = document.getElementById('jokeBox');
+    const getJokeBtn = document.getElementById('getJokeBtn');
+    const speakJokeBtn = document.getElementById('speakJokeBtn');
+    const poemBtn = document.getElementById('poemBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const voiceNameEl = document.getElementById('voiceName');
+    const rateEl = document.getElementById('rate');
+    const pitchEl = document.getElementById('pitch');
+    const volumeEl = document.getElementById('volume');
+
+    let currentJoke = "";
+    let voices = [];
+    let selectedVoice = null;
+
+    // --- load available voices ---
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
+      // pick a default voice that looks good
+      selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
+      voiceNameEl.textContent = selectedVoice ? selectedVoice.name + " (" + selectedVoice.lang + ")" : "default";
+    }
+    const supported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+    if (supported) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+    } else {
+      speakJokeBtn.disabled = poemBtn.disabled = stopBtn.disabled = true;
+      voiceNameEl.textContent = 'Speech unavailable';
+    }
+    let speechGeneration = 0;
+    let pauseTimer = null;
+    function stopSpeech() {
+      speechGeneration++;
+      clearTimeout(pauseTimer);
+      pauseTimer = null;
+      if (supported) window.speechSynthesis.cancel();
+    }
+
+
+    function randomJoke() {
+      const j = jokes[Math.floor(Math.random() * jokes.length)];
+      currentJoke = j;
+      jokeBox.textContent = j;
+    }
+
+    getJokeBtn.addEventListener('click', () => {
+      randomJoke();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(currentJoke || jokeBox.textContent);
+        copyBtn.textContent = "Copied ✓";
+        setTimeout(()=> copyBtn.textContent = "Copy Joke", 1000);
+      } catch (e) {
+        alert("Copy failed — your browser may block clipboard.");
+      }
+    });
+
+    // speak helper (handles small pauses using '.......' marker)
+    function speakTextWithPauses(text) {
+      if (!supported) return;
+      stopSpeech();
+      const generation = speechGeneration;
+      const parts = text.split(/(?:\.{3,}|\n+)/).map(part => part.trim()).filter(Boolean);
+      function speakPart(index) {
+        if (generation !== speechGeneration || index >= parts.length) return;
+        const utterance = new SpeechSynthesisUtterance(parts[index]);
+        if (selectedVoice) utterance.voice = selectedVoice;
+        utterance.rate = Number(rateEl.value);
+        utterance.pitch = Number(pitchEl.value);
+        utterance.volume = Number(volumeEl.value);
+        utterance.onend = () => {
+          if (generation === speechGeneration) pauseTimer = setTimeout(() => speakPart(index + 1), 350);
+        };
+        utterance.onerror = () => { if (generation === speechGeneration) stopSpeech(); };
+        window.speechSynthesis.speak(utterance);
+      }
+      speakPart(0);
+    }
+
+    speakJokeBtn.addEventListener('click', () => {
+      const text = currentJoke || jokeBox.textContent;
+      if (!text || text.trim().length === 0) { alert("No joke to speak — press Get Random Joke first."); return; }
+      speakTextWithPauses(text);
+    });
+
+    // poem from your python example (with dots indicating pauses)
+    const poemText = "Sparkle sparkle little light,.....Shining softly through the night,.......Far above the world so high,.......Like a lantern in the sky,........Sparkle sparkle little light,.......Guiding dreams till morning bright......";
+
+    poemBtn.addEventListener('click', () => {
+      speakTextWithPauses(poemText);
+    });
+
+    stopBtn.addEventListener('click', stopSpeech);
+
+    // show available voice in UI when user clicks voice label (optional)
+    voiceNameEl.addEventListener('click', () => {
+      const list = voices.map((v,i) => `${i+1}. ${v.name} — ${v.lang}`).join('\n');
+      const pick = prompt("Available voices:\n\n" + list + "\n\nEnter number to choose voice (or cancel):");
+      const idx = parseInt(pick) - 1;
+      if (!isNaN(idx) && voices[idx]) {
+        selectedVoice = voices[idx];
+        voiceNameEl.textContent = selectedVoice.name + " (" + selectedVoice.lang + ")";
+      }
+    });
+
+    // quick initial joke
+    randomJoke();
+  </script>
+</body>
+</html>

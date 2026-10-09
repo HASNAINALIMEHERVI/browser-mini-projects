@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rock • Paper • Scissors</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #111833;
+      --text: #e7ecff;
+      --muted: #9fb0ff;
+      --accent: #6ea8ff;
+      --win: #29cc74;
+      --lose: #ff5c5c;
+      --draw: #ffb020;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 70% -10%, #cfe4e4 0%, var(--bg) 55%);
+      color: var(--text);
+      padding: 10px 20px;
+    }
+
+    /* ===== Top Website Heading ===== */
+    .top-heading {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      padding-top: 20px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 6px rgb(242, 237, 237);
+    }
+
+    /* ===== Rules Bar ===== */
+    .rules-bar {
+      background: linear-gradient(90deg, #ececf3 0%, #dfe6e9 100%);
+      padding: 16px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      color: #073660;
+    }
+    .rules-bar h2 { margin: 0 0 10px; color: #000; }
+    .rules-bar ul { margin: 0; padding-left: 20px; }
+
+    /* ===== Game Styles ===== */
+    .app {
+      width: min(960px, 100%);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(188, 46, 124, 0.429), rgba(232, 221, 221, 0.02));
+      border: 1px solid #fff;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    header { padding: 28px 28px 0; }
+    h1 { margin: 0 0 6px; font-size: clamp(26px, 3.6vw, 38px); }
+    .subtitle { margin: 0 0 18px; color: var(--muted); font-size: 14px; }
+
+    .grid { display: grid; gap: 20px; padding: 0 28px 28px; }
+    @media (min-width: 840px) {
+      .grid { grid-template-columns: 1.2fr .8fr; }
+    }
+
+    .panel { background: var(--panel); border-radius: 18px; padding: 18px; }
+
+    .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; }
+    .score { background: rgb(23, 17, 17); border-radius: 14px; padding: 14px; }
+    .score b { font-size: clamp(28px, 5vw, 40px); }
+
+    .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+    .btn { cursor: pointer; border: 0; border-radius: 16px; padding: 14px; font-size: 16px; font-weight: 600; background: linear-gradient(180deg, rgba(80, 66, 138, 0.276), rgba(255,255,255,.03)); color: var(--text); }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn .emoji { font-size: 40px; }
+
+    .output { display: grid; gap: 16px; }
+    .round { background: rgb(34, 31, 31); border-radius: 14px; padding: 14px; display: grid; grid-template-columns: 1fr 24px 1fr; text-align: center; }
+    .result { border-radius: 14px; padding: 14px; text-align: center; font-weight: 700; }
+    .result.win { background: rgba(41,204,116,.15); color: var(--win); }
+    .result.lose { background: rgba(255,92,92,.2); color: var(--lose); }
+    .result.draw { background: rgba(255,176,32,.2); color: var(--draw); }
+    .final-winner { font-size: 20px; font-weight: bold; color: gold; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <!-- Big Heading -->
+  <div class="top-heading">Browser game practice</div>
+
+  <!-- Rules on Top -->
+  <div class="rules-bar">
+    <h2>Game Rules</h2>
+    <ul>
+      <li>✊ Rock beats Scissors </li>
+      <li>✌️ Scissors beat Paper </li>
+      <li>✋ Paper beats Rock </li>
+      <li>🔁 Same choice → Draw</li>
+      <li>🏆 First to 5 wins is the Final Winner!</li>
+    </ul>
+  </div>
+
+  <!-- Game -->
+  <main class="app">
+    <header>
+      <h1>Rock • Paper • Scissors</h1>
+      <p class="subtitle">Beat the bot. First to 5 wins!</p>
+    </header>
+
+    <section class="grid">
+      <section class="panel">
+        <div class="scoreboard">
+          <div class="score"><div>👤 You</div><b id="pScore">0</b></div>
+          <div class="score"><div>🤖 Bot</div><b id="cScore">0</b></div>
+        </div>
+
+        <div class="choices">
+          <button class="btn" data-choice="rock"><div class="emoji">✊</div>Rock</button>
+          <button class="btn" data-choice="paper"><div class="emoji">✋</div>Paper</button>
+          <button class="btn" data-choice="scissors"><div class="emoji">✌️</div>Scissors</button>
+        </div>
+      </section>
+
+      <section class="panel output">
+        <div class="round" id="round">
+          <div id="youPick">You: —</div>
+          <div class="vs">VS</div>
+          <div id="botPick">Bot: —</div>
+        </div>
+        <div id="result" role="status" aria-live="polite" class="result draw">Make your move!</div>
+        <div id="finalWinner" class="final-winner"></div>
+        <button id="reset" class="btn">↻ Reset</button>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const choices = ["rock","paper","scissors"];
+    const winsOver = { rock:"scissors", scissors:"paper", paper:"rock" };
+
+    const pScoreEl=document.getElementById("pScore");
+    const cScoreEl=document.getElementById("cScore");
+    const youPick=document.getElementById("youPick");
+    const botPick=document.getElementById("botPick");
+    const resultEl=document.getElementById("result");
+    const finalWinnerEl=document.getElementById("finalWinner");
+
+    let pScore=0,cScore=0, gameOver=false;
+
+    function botChoice(){ return choices[Math.floor(Math.random()*3)]; }
+
+    function play(player){
+      if(gameOver || !choices.includes(player)) return;
+
+      const comp=botChoice();
+      youPick.textContent="You: "+player;
+      botPick.textContent="Bot: "+comp;
+
+      if(player===comp){
+        resultEl.textContent="It's a draw."; resultEl.className="result draw";
+      } else if(winsOver[player]===comp){
+        pScore++; pScoreEl.textContent=pScore;
+        resultEl.textContent="You win this round!"; resultEl.className="result win";
+      } else {
+        cScore++; cScoreEl.textContent=cScore;
+        resultEl.textContent="You lose this round."; resultEl.className="result lose";
+      }
+
+      if(pScore===5 || cScore===5){
+        gameOver=true;
+        document.querySelectorAll(".btn[data-choice]").forEach(button => button.disabled = true);
+        finalWinnerEl.textContent = pScore===5 ? "🎉 You are the Final Winner!" : "💻 Bot Wins the Game!";
+      }
+    }
+
+    document.querySelectorAll(".btn[data-choice]").forEach(btn=>{
+      btn.addEventListener("click",()=>play(btn.dataset.choice));
+    });
+    document.getElementById("reset").addEventListener("click",()=>{
+      pScore=cScore=0; gameOver=false;
+      document.querySelectorAll(".btn[data-choice]").forEach(button => button.disabled = false);
+      pScoreEl.textContent=cScoreEl.textContent="0";
+      youPick.textContent="You: —"; botPick.textContent="Bot: —";
+      resultEl.textContent="Make your move!"; resultEl.className="result draw";
+      finalWinnerEl.textContent="";
+    });
+  </script>
+</body>
+</html>

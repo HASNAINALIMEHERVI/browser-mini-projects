@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎲 Number Guessing Game 🎲</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #ff9966 50%, #66ccff 50%);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .box {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 100%;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    input {
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      text-align: center;
+      width: 80%;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #ffcc00;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ffaa00;
+    }
+
+    .message {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    ul {
+      text-align: left;
+      margin: 0;
+      padding-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Title Box -->
+    <div class="box">
+      <h1>Number Guessing Game</h1>
+    </div>
+
+    <!-- Rules Box -->
+    <div class="box">
+      <h2>📜 Rules</h2>
+      <ul>
+        <li>Main 1 se 100 tak ek number soch raha hoon.</li>
+        <li>Tumhe guess karna hai.</li>
+        <li>Agar number bara hua → 📉 "Too low".</li>
+        <li>Agar number chhota hua → 📈 "Too high".</li>
+        <li>Sahi hua to game khatam! 🎉</li>
+      </ul>
+    </div>
+
+    <!-- Game Box -->
+    <div class="box">
+      <h2>🎲 Number Guessing Game 🎲</h2>
+      <label for="guessInput">Guess a whole number from 1 to 100</label><input type="number" id="guessInput" min="1" max="100" step="1" inputmode="numeric" />
+      <br>
+      <button id="guessButton" onclick="checkGuess()">Guess</button> <button onclick="resetGame()">New game</button>
+      <p class="message" id="message" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script>
+    let secretNumber, attempts, finished;
+    const input = document.getElementById("guessInput");
+    const message = document.getElementById("message");
+    const button = document.getElementById("guessButton");
+    function resetGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1;
+      attempts = 0; finished = false;
+      input.value = ""; input.disabled = false; button.disabled = false;
+      message.textContent = "A new number is ready.";
+    }
+    function checkGuess() {
+      if (finished) return;
+      const guess = Number(input.value);
+      if (!input.value.trim() || !Number.isInteger(guess) || guess < 1 || guess > 100) {
+        message.textContent = "Enter a whole number from 1 to 100.";
+        return;
+      }
+      attempts++;
+      if (guess < secretNumber) message.textContent = "Too low. Try a larger number.";
+      else if (guess > secretNumber) message.textContent = "Too high. Try a smaller number.";
+      else {
+        message.textContent = `Correct! You won in ${attempts} attempts.`;
+        finished = true; input.disabled = true; button.disabled = true;
+      }
+    }
+    input.addEventListener("keydown", event => { if (event.key === "Enter") checkGuess(); });
+    resetGame();
+  </script>
+</body>
+</html>

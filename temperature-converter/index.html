@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celsius → Fahrenheit Converter</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #a5d6a7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh; padding: 24px 16px;
+      color: #00363a;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      width: min(320px, 100%);
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #2e7d32;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      border: 2px solid #26a69a;
+      border-radius: 8px;
+      font-size: 16px;
+      outline-offset: 3px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #26a69a;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #2e7d32;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🌡️ Temp Converter</h1>
+    <label for="celsius">Celsius</label><input type="number" id="celsius" step="any" placeholder="Enter Celsius">
+    <br>
+    <button onclick="convertTemp()">Convert</button>
+    <div class="result" id="result" role="status" aria-live="polite">Result will appear here</div>
+  </div>
+
+  <script>
+    function convertTemp() {
+      let c = document.getElementById("celsius").value;
+      if(!c.trim() || !Number.isFinite(Number(c)) || !Number.isFinite(Number(c) * 9/5 + 32)) {
+        document.getElementById("result").textContent = "Please enter a finite number.";
+        return;
+      }
+      let f = (Number(c) * 9/5) + 32;
+      document.getElementById("result").textContent = c + " °C = " + f.toFixed(4) + " °F";
+    }
+    document.getElementById("celsius").addEventListener("keydown", event => { if (event.key === "Enter") convertTemp(); });
+  </script>
+</body>
+</html>
