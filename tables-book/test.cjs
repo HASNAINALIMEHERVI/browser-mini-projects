@@ -1,0 +1,13 @@
+const vm=require('node:vm'),assert=require('node:assert/strict'),fs=require('node:fs');
+const nodes={};const events={};for(const id of ['heading','pageIndicator','prevBtn','nextBtn','leftTitle','leftRows','rightTitle','rightRows'])nodes[id]={textContent:'',disabled:false,addEventListener(name,fn){this[name]=fn},click(){if(!this.disabled)this.clickHandler?.()}};
+for(const n of Object.values(nodes))n.addEventListener=function(name,fn){if(name==='click')this.clickHandler=fn};
+const ctx={document:{getElementById:id=>nodes[id]},window:{addEventListener:(name,fn)=>events[name]=fn}};
+vm.runInNewContext(fs.readFileSync(require('node:path').join(__dirname,'index.html'),'utf8').split('<script>')[1].split('</script>')[0],ctx);
+assert.equal(nodes.leftTitle.textContent,'Table of 1');assert.equal(nodes.rightTitle.textContent,'Table of 2');assert.equal(nodes.prevBtn.disabled,true);
+for(let i=0;i<49;i++)nodes.nextBtn.click();
+assert.equal(nodes.leftTitle.textContent,'Table of 99');assert.equal(nodes.rightTitle.textContent,'Table of 100');assert.equal(nodes.pageIndicator.textContent,'Page 50 / 50');assert.equal(nodes.nextBtn.disabled,true);assert.equal(nodes.rightRows.textContent.split('\n')[9],'100*10=1000');
+nodes.nextBtn.click();assert.equal(nodes.pageIndicator.textContent,'Page 50 / 50');
+for(let i=0;i<49;i++)nodes.prevBtn.click();assert.equal(nodes.leftTitle.textContent,'Table of 1');assert.equal(nodes.prevBtn.disabled,true);
+events.keydown({key:'ArrowRight',target:{tagName:'INPUT'}});assert.equal(nodes.leftTitle.textContent,'Table of 1');
+events.keydown({key:'ArrowRight',target:{tagName:'BODY'},preventDefault(){}});assert.equal(nodes.leftTitle.textContent,'Table of 3');
+console.log('Tables book navigation and boundary checks passed');
