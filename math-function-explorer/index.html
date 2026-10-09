@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Function Explorer | Personal Math Demo</title>
+    
+<style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 0; margin: 0; background: #0c0c0c; color: #ff2d2d; text-align: center; line-height: 1.6; }
+    
+    /* Navigation Bar */
+    nav { background: #1a1a1a; padding: 15px; border-bottom: 2px solid red; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    nav a { color: white; text-decoration: none; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+    nav a:hover { color: red; }
+
+    h1 { color: #ff1a1a; text-shadow: 0 0 10px red; margin-top: 30px; }
+    .function-area { background: #1a1a1a; border: 2px solid #ff0000; border-radius: 10px; padding: 20px; max-width: 600px; margin: 20px auto; box-shadow: 0 0 15px red; }
+    
+    /* Calculator UI Elements */
+    #func-select { padding: 10px; width: 100%; background: black; color: red; border: 2px solid red; border-radius: 8px; height: 50px; margin-bottom: 15px; }
+    #inputs-area { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    #inputs-area input { background: black; color: red; padding: 10px; width: 100%; box-sizing: border-box; border: 1px solid red; border-radius: 4px; }
+    button { background: red; color: black; padding: 15px 30px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+    button:hover { background: #cc0000; transform: scale(1.05); }
+    #result-area { margin-top: 20px; padding: 15px; background: #330000; border-radius: 8px; color: #ff8080; border: 1px solid red; text-align: left; min-height: 50px; }
+
+    /* Educational Content Section - IMPORTANT FOR ADSENSE */
+    .content-section { max-width: 800px; margin: 50px auto; text-align: left; background: #111; padding: 30px; border-radius: 10px; border: 1px solid #333; color: #ccc; }
+    .content-section h2 { color: #ff1a1a; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    
+    footer { background: #1a1a1a; padding: 40px 20px; border-top: 2px solid red; margin-top: 50px; color: #888; }
+    footer a { color: #ff8080; text-decoration: none; margin: 0 10px; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid white;outline-offset:3px}.function-area{margin:20px 12px}@media(min-width:650px){.function-area{margin:20px auto}}#result-area{overflow-wrap:anywhere}</style>
+</head>
+<body>
+
+<nav><a href="../index.html">All demos</a><a href="#about">About this project</a></nav>
+
+<h1>Math Function Explorer</h1>
+<p>Personal JavaScript calculator • no AI model or professional accuracy guarantee</p>
+
+<div id="function-area" class="function-area">
+    <label for="func-select">Select Mathematical Function</label>
+    <select id="func-select"></select>
+    <div id="inputs-area"></div>
+    <div id="description-box" style="margin-bottom:15px; font-style:italic;">Description: Select a function to begin.</div>
+    <button id="calculate-btn">Calculate Now</button>
+    <div id="result-area" role="status" aria-live="polite">Result: Waiting for input...</div>
+</div>
+
+<section class="content-section" id="about"><h2>About this personal project</h2><p>Math Function Explorer is a deterministic JavaScript learning project by Hasnain Ali Mehervi. It includes arithmetic, statistics, approximate unit conversions, basic circuit formulas and small linear systems. It does not use an AI model.</p><p>Trigonometric inputs use radians. Variance is population variance. Month and year conversions use average durations, not calendar arithmetic. Floating-point rounding and near-singular matrices can affect results; verify engineering calculations independently.</p></section><footer>Sunny Web Studio · Personal demonstration</footer>
+<script>
+/* ───────────────────────────────────────────────
+    MATH FUNCTIONS (ALL INCLUDED + MERGED)
+─────────────────────────────────────────────── */
+const MathFuncs = {
+
+    // BASIC
+    multiplication: (x, y) => x * y,
+    addition: (x, y) => x + y,
+    subtraction: (x, y) => x - y,
+    division: (x, y) => y === 0 ? "Division by zero!" : x / y,
+    exponentiation: (x, y) => Math.pow(x, y),
+    modulus: (x, y) => x % y,
+    floor_division: (x, y) => Math.floor(x / y),
+    square: x => x * x,
+    cube: x => x * x * x,
+    square_root: x => x < 0 ? "NaN" : Math.sqrt(x),
+    cube_root: x => Math.cbrt(x),
+
+    // LOG
+    natural_log: x => Math.log(x),
+    logarithm: (x, base) => Math.log(x) / Math.log(base),
+
+    // ROUND & ABS
+    absolute_value: x => Math.abs(x),
+    rounding: x => Math.round(x),
+    ceiling: x => Math.ceil(x),
+    flooring: x => Math.floor(x),
+
+    // TRIGONOMETRY
+    degrees_to_radians: x => x * (Math.PI / 180),
+    radians_to_degrees: x => x * (180 /  Math.PI),
+    sine: x => Math.sin(x),
+    cosine: x => Math.cos(x),
+    tangent: x => Math.tan(x),
+    hypotenuse: (a,b) => Math.hypot(a,b),
+    trigonometric_inverse: x => `asin: ${Math.asin(x)}, acos: ${Math.acos(x)}, atan: ${Math.atan(x)}`,
+
+    // COMPLEX (FACTORIAL, GCD, LCM)
+    factorial: x => {
+        if (!Number.isInteger(x)) throw new Error("Factorial requires an integer");
+        if (x < 0 || x > 170) return "NaN (Too large or negative)";
+        let r = 1;
+        for (let i=2;i<=x;i++) r*=i;
+        return r;
+    },
+    gcd: (a,b) => {
+        if (!Number.isSafeInteger(a) || !Number.isSafeInteger(b)) throw new Error("GCD requires safe integers");
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b) [a,b] = [b,a%b];
+        return a;
+    },
+    lcm: (a,b) => { const g = MathFuncs.gcd(a,b); return g === 0 ? 0 : Math.abs((a/g)*b); },
+    permutation: (n,r) => MathFuncs.factorial(n)/MathFuncs.factorial(n-r),
+    combination: (n,r) => MathFuncs.factorial(n)/(MathFuncs.factorial(r)*MathFuncs.factorial(n-r)),
+
+    // STATISTICS (Array input is handled in updateInputs)
+    mean: arr => arr.reduce((a,b)=>a+b,0)/arr.length,
+    variance: arr => {
+        const m = MathFuncs.mean(arr);
+        return arr.reduce((s,x)=>s+(x-m)**2,0)/arr.length;
+    },
+    standard_deviation: arr => Math.sqrt(MathFuncs.variance(arr)),
+    median: arr => {
+        let s=[...arr].sort((a,b)=>a-b);
+        let m=Math.floor(s.length/2);
+        return s.length%2?s[m]:(s[m-1]+s[m])/2;
+    },
+    mode: arr => {
+        const c={};
+        let mx=0, md=null;
+        for(let v of arr){
+            c[v]=(c[v]||0)+1;
+            if(c[v]>mx){mx=c[v]; md=v;}
+        }
+        return md;
+    },
+
+    // NUMBER CHECK
+    is_even: x => x%2===0,
+    is_odd: x => x%2!==0,
+    is_palindrome: s => String(s)===[...String(s)].reverse().join(''),
+    is_perfect_square: x => Math.sqrt(x)%1===0,
+    is_leap_year: y => (y%4===0 && y%100!==0)||(y%400===0),
+    is_prime: x => {
+        if (!Number.isSafeInteger(x) || Math.abs(x)>1e12) throw new Error("Prime input must be an integer with magnitude at most 1e12");
+        if(x<=1)return false;
+        for(let i=2;i<=Math.sqrt(x);i++) if(x%i===0)return false;
+        return true;
+    },
+    is_armstrong: x => {
+        const s=String(x);
+        return x===s.split("").reduce((a,d)=>a+Math.pow(+d,s.length),0);
+    },
+
+    // BASE CONVERSION
+    binary_to_decimal: b => { if (!/^[01]+$/.test(String(b))) throw new Error("Use binary digits 0 and 1 only"); const r = parseInt(String(b),2); if (!Number.isSafeInteger(r)) throw new Error("Result exceeds safe integer precision"); return r; },
+    decimal_to_binary: d => { if (!Number.isSafeInteger(d) || d<0) throw new Error("Use a nonnegative safe integer"); return d.toString(2); },
+
+    // UNIT CONVERSION
+    celsius_to_fahrenheit: c => (c*9/5)+32,
+    fahrenheit_to_celsius: f => (f-32)*5/9,
+    kilometers_to_miles: km => km*0.621371,
+    miles_to_kilometers: mi => mi/0.621371,
+    inches_to_centimeters: inch => inch*2.54,
+    centimeters_to_inches: cm => cm/2.54,
+    pounds_to_kilograms: lb => lb*0.453592,
+    kilograms_to_pounds: kg => kg/0.453592,
+    liters_to_gallons: l => l*0.264172,
+    gallons_to_liters: g => g/0.264172,
+
+    // TIME
+    seconds_to_minutes: s => s/60,
+    minutes_to_seconds: m => m*60,
+    hours_to_minutes: h => h*60,
+    minutes_to_hours: m => m/60,
+    days_to_hours: d => d*24,
+    hours_to_days: h => h/24,
+    weeks_to_days: w => w*7,
+    days_to_weeks: d => d/7,
+    months_to_days: m => m*30.44, // Average
+    days_to_months: d => d/30.44,
+    years_to_days: y => y*365.25,
+    days_to_years: d => d/365.25,
+
+    // CIRCUITS
+    resistance_in_series: (r1,r2) => r1 + r2,
+    resistance_in_parallel: (r1,r2) => (r1 * r2) / (r1 + r2),
+    voltage_in_circuit: (v,r) => v * r, 
+    current_in_circuit: (v,r) => v / r,
+    power_in_circuit: (v,i) => v * i,
+    energy_consumption: (p,t) => p * t,
+    kcl : (sum_in, sum_out) => sum_in === sum_out ? "KCL holds (sum_in = sum_out)" : `KCL does not hold (sum_in: ${sum_in} != sum_out: ${sum_out})`,
+    kvl : (sum_voltage_rise, sum_voltage_drop) => sum_voltage_rise === sum_voltage_drop ? "KVL holds (rise = drop)" : `KVL does not hold (rise: ${sum_voltage_rise} != drop: ${sum_voltage_drop})`,
+    voltage_divider: (v_in, r1, r2) => v_in * (r2 / (r1 + r2)),
+    current_divider: (i_in, r1, r2) => i_in * (r1 / (r1 + r2)),
+    
+    // MATRICES (Determinant)
+    two_by_two_matrix_determinant: (a,b,c,d) => (a*d)-(b*c),
+    three_by_three_matrix_determinant: (a1,a2,a3,b1,b2,b3,c1,c2,c3) => {
+        return a1*(b2*c3 - b3*c2) - a2*(b1*c3 - b3*c1) + a3*(b1*c2 - b2*c1);
+    },
+    four_by_four_matrix_determinant: (
+        a11,a12,a13,a14,
+        a21,a22,a23,a24,
+        a31,a32,a33,a34,
+        a41,a42,a43,a44
+    ) => {
+
+        const det3 = (r1c1,r1c2,r1c3, r2c1,r2c2,r2c3, r3c1,r3c2,r3c3) => {
+            return r1c1*(r2c2*r3c3 - r3c2*r2c3)
+                - r1c2*(r2c1*r3c3 - r3c1*r2c3)
+                + r1c3*(r2c1*r3c2 - r3c1*r2c2);
+        };
+
+        return a11 * det3(a22,a23,a24, a32,a33,a34, a42,a43,a44)
+            - a12 * det3(a21,a23,a24, a31,a33,a34, a41,a43,a44)
+            + a13 * det3(a21,a22,a24, a31,a32,a34, a41,a42,a44)
+            - a14 * det3(a21,a22,a23, a31,a32,a33, a41,a42,a43);
+    },
+    five_by_five_matrix_determinant: (
+        a11,a12,a13,a14,a15,
+        a21,a22,a23,a24,a25,
+        a31,a32,a33,a34,a35,
+        a41,a42,a43,a44,a45,
+        a51,a52,a53,a54,a55
+    ) => {
+        const det3 = (r1c1,r1c2,r1c3, r2c1,r2c2,r2c3, r3c1,r3c2,r3c3) => {
+             return r1c1*(r2c2*r3c3 - r3c2*r2c3) - r1c2*(r2c1*r3c3 - r3c1*r2c3) + r1c3*(r2c1*r3c2 - r3c1*r2c2);
+        };
+        const det4 = (a11,a12,a13,a14,a21,a22,a23,a24,a31,a32,a33,a34,a41,a42,a43,a44) => {
+            return a11 * det3(a22,a23,a24, a32,a33,a34, a42,a43,a44)
+                - a12 * det3(a21,a23,a24, a31,a33,a34, a41,a43,a44)
+                + a13 * det3(a21,a22,a24, a31,a32,a34, a41,a42,a44)
+                - a14 * det3(a21,a22,a23, a31,a32,a33, a41,a42,a43);
+        };
+
+        const M2 = [a22,a23,a24,a25, a32,a33,a34,a35, a42,a43,a44,a45, a52,a53,a54,a55];
+        const M3 = [a21,a23,a24,a25, a31,a33,a34,a35, a41,a43,a44,a45, a51,a53,a54,a55];
+        const M4 = [a21,a22,a24,a25, a31,a32,a34,a35, a41,a42,a44,a45, a51,a52,a54,a55];
+        const M5 = [a21,a22,a23,a25, a31,a32,a33,a35, a41,a42,a43,a45, a51,a52,a53,a55];
+        const M6 = [a21,a22,a23,a24, a31,a32,a33,a34, a41,a42,a43,a44, a51,a52,a53,a54];
+
+        return (
+            a11 * det4(...M2)
+            - a12 * det4(...M3)
+            + a13 * det4(...M4)
+            - a14 * det4(...M5)
+            + a15 * det4(...M6)
+        );
+    },
+
+    // LINEAR EQUATION SOLVERS (Gaussian Elimination for n x n)
+    linear_equation_solver_2x2: (a, b, c, d, e, f) => {
+        // Equations: ax + by = c, dx + ey = f
+        const D  = (a * e) - (b * d);
+        if (D === 0) return "No unique solution (Determinant = 0).";
+
+        const Dx = (c * e) - (b * f);
+        const Dy = (a * f) - (c * d);
+
+        const x = Dx / D;
+        const y = Dy / D;
+
+        return [`x = ${x.toFixed(4)}`, `y = ${y.toFixed(4)}`];
+    },
+    linear_equation_solver_3x3: (...v) => linearSolver(3, v),
+    linear_equation_solver_4x4: (...v) => linearSolver(4, v),
+    linear_equation_solver_5x5: (...v) => linearSolver(5, v),
+    linear_equation_solver_6x6: (...v) => linearSolver(6, v),
+    linear_equation_solver_7x7: (...v) => linearSolver(7, v),
+    linear_equation_solver_8x8: (...v) => linearSolver(8, v),
+};
+
+/* ───────────────────────────────────────────────
+    UTILITIES & SOLVERS
+─────────────────────────────────────────────── */
+
+for (const [name, original] of Object.entries(MathFuncs)) {
+    const guarded = (...args) => {
+        if (["permutation","combination"].includes(name) && (!args.every(Number.isInteger) || args[0]<0 || args[1]<0 || args[1]>args[0] || args[0]>170)) throw new Error("Use integers with 0 <= r <= n <= 170");
+        if (["is_even","is_odd","is_leap_year","is_armstrong"].includes(name) && !Number.isSafeInteger(args[0])) throw new Error("Use a safe integer");
+        if (name === "trigonometric_inverse" && Math.abs(args[0])>1) throw new Error("Inverse sine/cosine require -1 <= x <= 1");
+        if (name === "logarithm" && (args[0]<=0 || args[1]<=0 || args[1]===1)) throw new Error("Use x > 0 and base > 0, base != 1");
+        const result = original(...args);
+        if (typeof result === "number" && !Number.isFinite(result)) throw new Error("Undefined result or numeric overflow");
+        return result;
+    };
+    Object.defineProperty(guarded, "length", {value:original.length});
+    MathFuncs[name] = guarded;
+}
+const arrayFuncs = ['mean', 'variance', 'standard_deviation', 'median', 'mode'];
+const linearSolverFuncs = Object.keys(MathFuncs).filter(name => name.startsWith('linear_equation_solver_'));
+
+// Generic Gaussian Elimination Solver (Used by 3x3 up to 8x8)
+const linearSolver = (n, v) => {
+    if(v.length !== n * (n + 1)) return `Error: Enter ${n * (n + 1)} values.`;
+
+    let A=[],B=[];
+    for(let i=0;i<n;i++){
+        A.push(v.slice(i*(n+1), i*(n+1)+n));
+        B.push(v[i*(n+1)+n]);
+    }
+
+    // Gaussian Elimination (Forward Elimination)
+    for(let i=0;i<n;i++){
+        let mr=i;
+        for(let k=i+1;k<n;k++)
+            if(Math.abs(A[k][i])>Math.abs(A[mr][i])) mr=k;
+        
+        [A[i],A[mr]]=[A[mr],A[i]];
+        [B[i],B[mr]]=[B[mr],B[i]];
+
+        if (A[i][i] === 0) return "No unique solution (pivot is zero).";
+
+        for(let k=i+1;k<n;k++){
+            let f=A[k][i]/A[i][i];
+            for(let j=i;j<n;j++) A[k][j]-=f*A[i][j];
+            B[k]-=f*B[i];
+        }
+    }
+
+    // Back Substitution
+    let X=Array(n).fill(0);
+    for(let i=n-1;i>=0;i--){
+        let s=B[i];
+        for(let j=i+1;j<n;j++) s-=A[i][j]*X[j];
+        if (A[i][i] === 0) return "No unique solution (pivot is zero during back substitution).";
+        X[i]=s/A[i][i];
+    }
+    return X.map((v,i)=>`x${i+1} = ${v.toFixed(4)}`);
+};
+
+
+/* ───────────────────────────────────────────────
+    POPULATE DROPDOWN
+─────────────────────────────────────────────── */
+const funcSelect=document.getElementById("func-select");
+Object.keys(MathFuncs).forEach(n=>{
+    let o=document.createElement("option");
+    o.value=n;
+    o.textContent=n.replace(/_/g," ");
+    funcSelect.appendChild(o);
+});
+
+const inputsArea=document.getElementById("inputs-area");
+const resultArea=document.getElementById("result-area");
+const descriptionBox = document.getElementById("description-box");
+
+// Input labels for Matrices and Solvers
+const inputLabels = {
+    // 2x2 Matrix: a,b,c,d (row-major order)
+    two_by_two_matrix_determinant: ['a', 'b', 'c', 'd'], 
+    // 3x3 Matrix: a1,a2,a3, b1,b2,b3, c1,c2,c3
+    three_by_three_matrix_determinant: ['a1','a2','a3', 'b1','b2','b3', 'c1','c2','c3'],
+    
+    linear_equation_solver_2x2: ['a', 'b', 'c', 'd', 'e', 'f'],
+};
+
+
+/* ───────────────────────────
+    INPUT GENERATOR (FIXED 3 PARAMETER FUNCTIONS)
+──────────────────────────── */
+function updateInputs(){
+    inputsArea.innerHTML="";
+    descriptionBox.innerHTML = "";
+    let name=funcSelect.value;
+    let fn=MathFuncs[name];
+    let numParams = fn.length;
+
+    // --- Special Case: Linear Solvers ---
+    if(linearSolverFuncs.includes(name)){
+        const n = parseInt(name.slice(-3,-2));
+        
+        let desc = n === 2 
+            ? `Enter coefficients for: aX + bY = c, dX + eY = f (Enter a, b, c, d, e, f)`
+            : `Enter the coefficients and constants for the ${n}x${n} system (R1C1, R1C2, ... R1Cn, R1Const, R2C1, ...):`;
+        descriptionBox.innerHTML = desc;
+        
+        if (n === 2) {
+             inputsArea.style.gridTemplateColumns = 'repeat(3, 1fr)';
+             inputLabels[name].forEach((label, index) => {
+                let placeholder = (index + 1) % 3 === 0 ? 'Constant' : 'Coefficient';
+                inputsArea.innerHTML += `
+                    <div class="input-group">
+                        <label for="input-${index}">${label}</label>
+                        <input id="input-${index}" type="number" placeholder="${placeholder}">
+                    </div>
+                `;
+            });
+        } else {
+            // General N x N Linear Solver Input (Coeffs and Constants)
+            inputsArea.style.gridTemplateColumns = `repeat(${n + 1}, 1fr)`;
+            for(let i=1;i<=n;i++){
+                for(let j=1;j<=n;j++){
+                    inputsArea.innerHTML+=`
+                        <div class="input-group">
+                            <label for="coef-${i}-${j}">C${i}${j}</label>
+                            <input id="coef-${i}-${j}" type="number" placeholder="a${i}${j}">
+                        </div>
+                    `;
+                }
+                inputsArea.innerHTML+=`
+                    <div class="input-group">
+                        <label for="const-${i}">B${i}</label>
+                        <input id="const-${i}" type="number" placeholder="b${i}">
+                    </div>
+                `;
+            }
+        }
+        return;
+    }
+
+    // --- Special Case: Matrix Determinants ---
+    if(name.includes('matrix_determinant')){
+        const n = {two:2,three:3,four:4,five:5}[name.split("_")[0]];
+        inputsArea.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+        descriptionBox.innerHTML = `Enter matrix elements in row-major order (${n*n} inputs).`;
+        
+        let labels = inputLabels[name] || [];
+        if (n >= 4) {
+            labels = [];
+            for (let i = 1; i <= n; i++) {
+                for (let j = 1; j <= n; j++) {
+                    labels.push(`a${i}${j}`);
+                }
+            }
+        }
+        
+        labels.forEach((label, index) => {
+            inputsArea.innerHTML += `
+                <div class="input-group">
+                    <label for="input-${index}">${label}</label>
+                    <input id="input-${index}" type="number" placeholder="${label}">
+                </div>
+            `;
+        });
+        return;
+    }
+
+    // --- Special Case: Array Functions ---
+    if(arrayFuncs.includes(name)){
+        inputsArea.style.gridTemplateColumns = '1fr';
+        descriptionBox.innerHTML = `Enter numbers separated by commas (e.g., 10, 20, 30, 40).`;
+        inputsArea.innerHTML=`<input id="input-arr" type="text" placeholder="Enter numbers separated by commas">`;
+        return;
+    }
+
+    // --- Standard Cases: 3 Parameters (New block for Voltage/Current Divider) ---
+    if(numParams === 3){
+        inputsArea.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        let xLabel, yLabel, zLabel, desc;
+
+        if (name === 'voltage_divider'){
+            xLabel = 'V_in (Total Voltage)';
+            yLabel = 'R1 (Series Resistor)';
+            zLabel = 'R2 (Resistor to find V_out across)';
+            desc = 'Calculates V_out across R2: V_out = V_in * (R2 / (R1 + R2))';
+        } else if (name === 'current_divider'){
+            xLabel = 'I_in (Total Current)';
+            yLabel = 'R1 (Branch Resistor 1)';
+            zLabel = 'R2 (Branch Resistor 2, finding I_out in R1)';
+            desc = 'Calculates I_out in R1: I_out = I_in * (R2 / (R1 + R2))';
+        } else {
+            xLabel = 'A'; yLabel = 'B'; zLabel = 'C';
+            desc = 'Enter three values.';
+        }
+
+        descriptionBox.innerHTML = desc;
+        inputsArea.innerHTML=`
+            <div class="input-group">
+                <label for="input-x">${xLabel}</label>
+                <input id="input-x" type="number" placeholder="${xLabel}">
+            </div>
+            <div class="input-group">
+                <label for="input-y">${yLabel}</label>
+                <input id="input-y" type="number" placeholder="${yLabel}">
+            </div>
+            <div class="input-group">
+                <label for="input-z">${zLabel}</label>
+                <input id="input-z" type="number" placeholder="${zLabel}">
+            </div>
+        `;
+        return;
+    }
+
+    // --- Standard Cases: 1 or 2 Parameters ---
+    inputsArea.style.gridTemplateColumns = numParams === 1 ? '1fr' : 'repeat(2, 1fr)';
+
+    if(numParams===1){
+        descriptionBox.innerHTML = `Enter the single value (X).`;
+        inputsArea.innerHTML=`
+            <div class="input-group">
+                <label for="input-x">X</label>
+                <input id="input-x" type="number" placeholder="Enter value">
+            </div>
+        `;
+    } else if(numParams===2){
+        descriptionBox.innerHTML = `Enter two values (X and Y).`;
+        inputsArea.innerHTML=`
+            <div class="input-group">
+                <label for="input-x">X</label>
+                <input id="input-x" type="number" placeholder="Enter X">
+            </div>
+            <div class="input-group">
+                <label for="input-y">Y</label>
+                <input id="input-y" type="number" placeholder="Enter Y">
+            </div>
+        `;
+    } else {
+        descriptionBox.innerHTML = `No specific inputs defined for this function.`;
+    }
+}
+funcSelect.addEventListener("change",updateInputs);
+updateInputs();
+
+/* ───────────────────────────
+    CALCULATE (FIXED 3 PARAMETER FUNCTIONS)
+──────────────────────────── */
+document.getElementById("calculate-btn").addEventListener("click",()=>{
+    try {
+    for (const input of document.querySelectorAll("#inputs-area input")) {
+        const parts = input.id === "input-arr" ? input.value.split(",") : [input.value];
+        if(parts.length>10000 || parts.some(v=>!v.trim() || !Number.isFinite(Number(v)))) throw new Error("Enter finite numbers in every field");
+    }
+    let name=funcSelect.value;
+    let fn=MathFuncs[name];
+    const numParams = fn.length;
+
+    // --- Special Case: Linear Solvers (N x N) ---
+    if(linearSolverFuncs.includes(name)){
+        const n = parseInt(name.slice(-3,-2));
+        let v=[];
+        if (n === 2) {
+             for (let i = 0; i < 6; i++) {
+                v.push(Number(document.getElementById(`input-${i}`).value));
+             }
+        } else {
+            for(let i=1;i<=n;i++){
+                for(let j=1;j<=n;j++)
+                    v.push(Number(document.getElementById(`coef-${i}-${j}`).value));
+                v.push(Number(document.getElementById(`const-${i}`).value));
+            }
+        }
+
+        let r=fn(...v);
+        resultArea.textContent="Result: "+ (Array.isArray(r) ? r.join("; ") : r);
+        return;
+    }
+
+    // --- Special Case: Matrix Determinants (N x N) ---
+    if(name.includes('matrix_determinant')){
+        const n = {two:2,three:3,four:4,five:5}[name.split("_")[0]];
+        let v=[];
+        for(let i=0;i<n*n;i++){
+            v.push(Number(document.getElementById(`input-${i}`).value));
+        }
+
+        let r = fn(...v);
+        resultArea.textContent="Result: "+r;
+        return;
+    }
+
+    // --- Special Case: Array Functions (Comma separated string) ---
+    if(arrayFuncs.includes(name)){
+        let arrStr = document.getElementById("input-arr").value;
+        let arr = arrStr.split(',').map(s => Number(s.trim()));
+        
+        if (arr.length === 0) {
+            resultArea.textContent = "Result: Error, no valid numbers entered.";
+            return;
+        }
+        
+        let r = fn(arr);
+        resultArea.textContent="Result: "+r;
+        return;
+    }
+
+    // --- Standard Cases: 1, 2, or 3 Parameters ---
+    let xEl = document.getElementById("input-x");
+    let x = xEl ? Number(xEl.value) : null;
+    let yEl = document.getElementById("input-y");
+    let y = yEl ? Number(yEl.value) : null;
+    let zEl = document.getElementById("input-z");
+    let z = zEl ? Number(zEl.value) : null;
+
+    let r;
+    if (numParams === 3) {
+        // Handle 3 parameters
+        r = fn(x, y, z);
+    } else if (numParams === 2) {
+        // Handle 2 parameters
+        r = fn(x, y);
+    } else if (numParams === 1) {
+        // Handle 1 parameter
+        r = fn(x);
+    } else {
+        r = "Error: Function parameter count not recognized.";
+    }
+
+    resultArea.textContent="Result: "+r;
+    } catch(error) { resultArea.textContent = "Error: " + error.message; }
+});
+</script>
+
+</body>
+</html>
